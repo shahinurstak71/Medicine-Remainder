@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "366950507112",
+    "project_id": "medicinereminder-ffdae",
+    "storage_bucket": "medicinereminder-ffdae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:366950507112:android:55603e10f59005657b91dd",
+        "android_client_info": {
+          "package_name": "com.example.medicineremainder"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "366950507112-k40efbrpluirh1t4jjpl1gtaqdio891v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDo-RH6JWAL9ipCi_P3Cghe0H8hxsnem2Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "366950507112-k40efbrpluirh1t4jjpl1gtaqdio891v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
