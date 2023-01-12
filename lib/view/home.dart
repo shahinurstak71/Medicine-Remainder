@@ -129,109 +129,107 @@ class _HomePageState extends State<HomePage> {
                     QueryDocumentSnapshot document= snapshot.data!.docs[index];
                     return  auth.currentUser!.uid==document["uid"]?
 
-                        Column(
-                          children: [
-                            SizedBox(height: 20,),
-                            Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(30)
+                        Container(
+                          decoration: BoxDecoration(
+                              color: Colors.grey.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(30)
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: 20,),
+                              CircleAvatar(
+                                   radius: 70,
+                                   backgroundColor: Colors.blueAccent,
+                                backgroundImage: NetworkImage(document["image"]),
+                                 ),
+                              Container(
+
+                                child:ListTile(
+                                  title: Row(
+                                    children: [
+                                      Text("Patient Name: ", style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight:FontWeight.bold,
+                                          color: Colors.black54)),
+                                      Text(document["patientName"]!,style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight:FontWeight.bold,
+                                          color: Colors.black54),),
+                                    ],
+                                  ),),
                               ),
-                              child:ListTile(
-                                title: Row(
+
+                              SizedBox(height: 15,),
+
+                              ListView.builder(
+
+                                primary: false,
+                                  shrinkWrap: true,
+
+                                  itemCount:document["medicineDetails"].length ,
+                                  itemBuilder: (context, index){
+
+                                    var data = document["medicineDetails"][index];
+                                return Column(
                                   children: [
-                                    Text("Patient Name: ", style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight:FontWeight.bold,
-                                        color: Colors.black54)),
-                                    Text(document["patientName"]!,style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight:FontWeight.bold,
-                                        color: Colors.black54),),
+                                    Container(
+
+                                      child: ListTile(
+                                        title: Row(
+                                          children: [
+                                            Text("Medicine Name: ", style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:FontWeight.bold,
+                                                color: Colors.black54)),
+
+                                            Text(data["medicineName"]!,style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:FontWeight.bold,
+                                                color: Colors.black54),),
+                                          ],
+                                        ),),
+                                    ),
+                                    SizedBox(height: 15,),
+                                    Container(
+                                      child: ListTile(
+                                        title: Row(
+                                          children: [
+                                            Text("Eating Time: ", style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:FontWeight.bold,
+                                                color: Colors.black54)),
+
+                                            Text(data["eating"]!,style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:FontWeight.bold,
+                                                color: Colors.black54),),
+                                          ],
+                                        ),),
+                                    ),
+                                    SizedBox(height: 15,),
+                                    Container(
+
+                                      child: ListTile(
+                                        title: Row(
+                                          children: [
+                                            Text("Quantity: ", style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:FontWeight.bold,
+                                                color: Colors.black54)),
+
+                                            Text(data["qty"]!,style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight:FontWeight.bold,
+                                                color: Colors.black54),),
+                                          ],
+                                        ),),
+                                    ),
+                                    SizedBox(height: 15,),
                                   ],
-                                ),),
-                            ),
-
-                            SizedBox(height: 15,),
-
-                            ListView.builder(
-
-                              primary: false,
-                                shrinkWrap: true,
-
-                                itemCount:document["medicineDetails"].length ,
-                                itemBuilder: (context, index){
-
-                                  var data = document["medicineDetails"][index];
-                              return Column(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(0.3),
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: ListTile(
-                                      title: Row(
-                                        children: [
-                                          Text("Medicine Name: ", style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54)),
-
-                                          Text(data["medicineName"]!,style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54),),
-                                        ],
-                                      ),),
-                                  ),
-                                  SizedBox(height: 15,),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(0.3),
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: ListTile(
-                                      title: Row(
-                                        children: [
-                                          Text("Eating Time: ", style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54)),
-
-                                          Text(data["eating"]!,style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54),),
-                                        ],
-                                      ),),
-                                  ),
-                                  SizedBox(height: 15,),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                        color: Colors.grey.withOpacity(0.3),
-                                        borderRadius: BorderRadius.circular(30)
-                                    ),
-                                    child: ListTile(
-                                      title: Row(
-                                        children: [
-                                          Text("Quantity: ", style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54)),
-
-                                          Text(data["qty"]!,style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54),),
-                                        ],
-                                      ),),
-                                  ),
-                                  SizedBox(height: 15,),
-                                ],
-                              );
-                            })
-                          ],
+                                );
+                              })
+                            ],
+                          ),
                         )
 
                         :Container();

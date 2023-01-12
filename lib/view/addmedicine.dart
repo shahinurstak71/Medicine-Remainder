@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_alarm_clock/flutter_alarm_clock.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'model/dynamicText.dart';
 
@@ -19,6 +23,29 @@ class _AddMedicineState extends State<AddMedicine> {
    var qty = <TextEditingController>[];
   TextEditingController patientName =TextEditingController();
 
+   File ? imagefile;
+   ImagePicker imagePicker = ImagePicker();
+   String? imagepath;
+
+
+   bool chackpassword=true;
+   void takePhoto (ImageSource source)async{
+     final picarimagefile= await imagePicker.getImage(source:source,imageQuality: 80);
+     setState(() {
+       imagefile= File(picarimagefile!.path);
+     });
+     Reference reference=FirebaseStorage.instance.ref().child(DateTime.now().toString());
+     await reference.putFile(File(imagefile!.path));
+     reference.getDownloadURL().then((value){
+       setState(() {
+         imagepath=value;
+         print("Image Link....${imagepath}");
+       });
+
+     });
+
+   }
+
    var widgets = <Widget>[];
    _onDone() {
      List<DynamicController> entries = [];
@@ -32,7 +59,7 @@ class _AddMedicineState extends State<AddMedicine> {
    }
   addMedicine()async{
     await FirebaseFirestore.instance.collection("Medicine").add(
-  {
+    {
           "patientName":patientName.text,
     
           "medicineDetails":
@@ -43,7 +70,9 @@ class _AddMedicineState extends State<AddMedicine> {
             "qty":qty[index].text,
 
           }),
-          "uid":FirebaseAuth.instance.currentUser!.uid
+          "uid":FirebaseAuth.instance.currentUser!.uid,
+      "image": imagepath
+
 
 
           // "occopation" : workControllar.text
@@ -126,10 +155,59 @@ class _AddMedicineState extends State<AddMedicine> {
             controller: ScrollController(),
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: NetworkImage(
-                      "https://tse1.mm.bing.net/th?id=OIP.lk0mSZHNt1YOxS_YERXRNwHaEq&pid=Api&P=0"),
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    imagefile != null
+                        ? CircleAvatar(
+                      radius: 70,
+                      backgroundImage: FileImage(File(imagefile!.path)),
+                    )
+                        : CircleAvatar(
+                      radius: 70,
+                      backgroundColor: Colors.blueAccent,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 18),
+                      child: InkWell(
+                          onTap: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    title: Text("Uplod a Photo"),
+                                    content: Row(
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.center,
+                                      children: [
+                                        TextButton(
+                                            onPressed: () {
+                                              takePhoto(ImageSource.camera);
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Camera")),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        TextButton(
+                                            onPressed: () {
+                                              takePhoto(ImageSource.gallery);
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Gallery"))
+                                      ],
+                                    ),
+                                  );
+                                });
+                          },
+                          child: Icon(
+                            Icons.camera,
+                            size: 30,
+                          )),
+                    )
+                  ],
                 ),
                 SizedBox(
                   height: 10,
@@ -161,17 +239,9 @@ class _AddMedicineState extends State<AddMedicine> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 35),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      ElevatedButton(
-                          onPressed: () {
 
-                            _selectDateTime(context);
-
-
-                          }, child: Text("Set Alarm")),
-                      SizedBox(
-                        width: 60,
-                      ),
                       ElevatedButton(
                           onPressed: () => setState(() => widgets.add(TextForm())), child: Text("More Medicine")),
                     ],
@@ -290,6 +360,18 @@ class _AddMedicineState extends State<AddMedicine> {
             return null;
           },
         ),
+        SizedBox(
+          width: 10,
+        ),
+        ElevatedButton(
+            onPressed: () {
+
+              _selectDateTime(context);
+
+
+            }, child: Text("Set Alarm")),
+
+
       ],
     );
   }
