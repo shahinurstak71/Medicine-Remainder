@@ -1,14 +1,12 @@
-
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:intl/intl.dart';
+import 'package:medicineremainder/notification/cancel_notification.dart';
 import 'package:medicineremainder/view/addmedicine.dart';
-
 import '../widget/drawer_widget.dart';
-import 'feedback/feedback.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
 
@@ -17,10 +15,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final AdvancedDrawerController _drawerController=AdvancedDrawerController();
-  List<String>getDatalist=[];
+  final AdvancedDrawerController _drawerController = AdvancedDrawerController();
+  List<String> getDatalist = [];
 
-  FirebaseAuth auth=FirebaseAuth.instance;
+  FirebaseAuth auth = FirebaseAuth.instance;
 
   // Future getUserData()async{
   //   await FirebaseFirestore.instance.collection("user").get().then((value){
@@ -31,15 +29,160 @@ class _HomePageState extends State<HomePage> {
   //     });
   //   });
   // }
-  @override
+  var now = new DateTime.now();
+  var formatter = new DateFormat().add_jm();
+
+  String datetime = DateTime.now().toString();
+// String ? dateTime;
+String ? name;
+String ? image;
+String ? eating;
+String ? qty;
+
+
+  getData() async {
+    await FirebaseFirestore.instance.collection("Medicine").get().then((value) {
+      value.docs.forEach((element) {
+
+        element.data().forEach((key, value) {
+          print("value111${value}");
+         // list.add(value);
+          for(var data in value){
+            print("dataaaaaaa${data['time']}");
+
+            if(DateFormat().add_jm().format(DateTime.now())==data["time"]){
+
+
+              showDialog(
+                  context: context,
+                  builder: (_) {
+                    return AlertDialog(
+                      content: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            CircleAvatar(
+                              radius: 35,
+                              backgroundImage:
+                              NetworkImage("${element['image']}"),
+                            ),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  "Patient Name : ${element['patientName']}"),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  "Medicine Name : ${data['medicineName']}"),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  "Eating Time : ${data['eating']}"),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  "Quantity : ${data['qty']}"),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Text("Accept")),
+                                SizedBox(
+                                  width: 20,
+                                ),
+                                ElevatedButton(
+                                    onPressed: () {
+                                      cancelNotification().then((value) {
+                                        Navigator.pop(context,true);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    CancelNotification()));
+                                      });
+                                    },
+                                    child: Text("Cancel")),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+              image = element["image"];
+              name = data["medicineName"];
+              eating = data["eating"];
+              qty = data["qty"];
+              setState(() {
+
+              });
+            }
+
+          }
+
+
+          // list.add(value);
+          // //list.elementAt(value);
+          // list.forEach((element) {
+          //   if(DateFormat().add_jm().format(DateTime.now())== element['time']){
+          //     showDialog(context: context, builder: (_){
+          //       return AlertDialog(
+          //         content: SingleChildScrollView(
+          //           child: Column(
+          //             children: [
+          //               Text("OK")
+          //             ],
+          //           ),
+          //         ),
+          //       );
+          //     });
+          //
+          //   }
+          // });
+
+        });
+
+
+
+
+
+
+      });
+    });
+
+  }
+
+
+@override
   void initState() {
-    // getUserData();
-    // TODO: implement initState
+    setState(() {
+      getData();
+    });
     super.initState();
   }
+  @override
+  void didUpdateWidget(covariant HomePage oldWidget) {
+
+   setState(() {
+     getData();
+   });
+    super.didUpdateWidget(oldWidget);
+  }
+
 
   @override
   Widget build(BuildContext context) {
+ // getData();
     return AdvancedDrawer(
       backdropColor: Colors.indigoAccent,
       controller: _drawerController,
@@ -49,43 +192,44 @@ class _HomePageState extends State<HomePage> {
       rtlOpening: false,
       drawer:
       StreamBuilder<QuerySnapshot>(
-        stream:FirebaseFirestore.instance.collection("user").snapshots(),
-        builder:(context,snapshot){
-         if(snapshot.hasData){
-           return ListView.builder(
-               itemCount:snapshot.data!.docs.length,
-               primary: false,
-               shrinkWrap: true,
-               itemBuilder: (context,index){
-                 QueryDocumentSnapshot document= snapshot.data!.docs[index];
-                 return  auth.currentUser!.uid==document["id"]? DrawerWidget(
-                   imageurl: document["photo"],
-                   name: document["name"],
-                   email:document["email"] ,
-                 ):Container();
-               });
-         }
-         else{
-           return Text("LOADING . . . .");
-         }
+        stream: FirebaseFirestore.instance.collection("user").snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return ListView.builder(
+                itemCount: snapshot.data!.docs.length,
+                primary: false,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  QueryDocumentSnapshot document = snapshot.data!.docs[index];
+                  return auth.currentUser!.uid == document["id"]
+                      ? DrawerWidget(
+                          imageurl: document["photo"],
+                          name: document["name"],
+                          email: document["email"],
+                        )
+                      : Container();
+                });
+          } else {
+            return Text("LOADING . . . .");
+          }
 
-         // ListView.builder(
-            //   itemCount:
-            //   primary: false,
-            //   shrinkWrap: true,
-            //   itemBuilder: (context,index){
-            //     QueryDocumentSnapshot document=snapshot.data!.docs[index];
-            //     return  auth.currentUser!.uid==document["uid"]? DrawerWidget(
-            //       imageurl: document["photo"],
-            //       name: document["name"],
-            //     ):Container();
-            //   });
+          // ListView.builder(
+          //   itemCount:
+          //   primary: false,
+          //   shrinkWrap: true,
+          //   itemBuilder: (context,index){
+          //     QueryDocumentSnapshot document=snapshot.data!.docs[index];
+          //     return  auth.currentUser!.uid==document["uid"]? DrawerWidget(
+          //       imageurl: document["photo"],
+          //       name: document["name"],
+          //     ):Container();
+          //   });
         },
       ),
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            onPressed: (){
+            onPressed: () {
               _drawerController.showDrawer();
             },
             icon: ValueListenableBuilder<AdvancedDrawerValue>(
@@ -106,152 +250,267 @@ class _HomePageState extends State<HomePage> {
           elevation: 0,
           actions: [
             IconButton(
-                onPressed: (){
-
-
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => CancelNotification()));
                 },
                 icon: Icon(Icons.notifications))
           ],
         ),
 
         body:
-
-
         StreamBuilder<QuerySnapshot>(
-          stream:FirebaseFirestore.instance.collection("Medicine").snapshots(),
-          builder:(context,snapshot){
-            if(snapshot.hasData){
+          stream: FirebaseFirestore.instance.collection("Medicine").snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
               return ListView.builder(
-                  itemCount:snapshot.data!.docs.length,
+                  itemCount: snapshot.data!.docs.length,
                   primary: false,
                   shrinkWrap: true,
-                  itemBuilder: (context,index){
+                  itemBuilder: (context, index) {
+                    QueryDocumentSnapshot document = snapshot.data!.docs[index];
 
-                    QueryDocumentSnapshot document= snapshot.data!.docs[index];
-
-
-
-
-                    return  auth.currentUser!.uid==document["uid"]?
-
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
-                            elevation: 4,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  borderRadius: BorderRadius.circular(30)
-                              ),
+                    return auth.currentUser!.uid == document["uid"]
+                        ? Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Card(
+                              elevation: 11,
+                              // decoration: BoxDecoration(
+                              //
+                              //     borderRadius: BorderRadius.circular(30)),
                               child: Column(
                                 children: [
-                                  SizedBox(height: 20,),
-                                  document["image"]==null  ?  Container():   CircleAvatar(
-                                       radius: 70,
-                                       backgroundColor: Colors.blueAccent,
-                                    backgroundImage: NetworkImage(document["image"]),
-                                     ) ,
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  document["image"] == null
+                                      ? Container()
+                                      : CircleAvatar(
+                                          radius: 40,
+                                          backgroundColor: Colors.blueAccent,
+                                          backgroundImage:
+                                              NetworkImage(document["image"]),
+                                        ),
                                   Container(
-
-                                    child:ListTile(
+                                    child: ListTile(
                                       title: Row(
                                         children: [
-                                          Text("Patient Name: ", style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54)),
-                                          Text(document["patientName"]!,style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight:FontWeight.bold,
-                                              color: Colors.black54),),
+                                          Text("Patient Name: ",
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black)),
+                                          Text(
+                                            document["patientName"]!,
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
+                                          ),
                                         ],
-                                      ),),
+                                      ),
+                                    ),
                                   ),
-
-                                  SizedBox(height: 15,),
-
+                                  SizedBox(
+                                    height: 15,
+                                  ),
                                   ListView.builder(
-
-                                    primary: false,
+                                      primary: false,
                                       shrinkWrap: true,
-
-                                      itemCount:document["medicineDetails"].length ,
-                                      itemBuilder: (context, index){
-
-                                        var data = document["medicineDetails"][index];
-                                        if( DateFormat().add_jm().format(DateTime.now()) ==data['time']){
-                                         return Text("Abir Hasan ");
-                                        }else{
-                                          return Column(
-                                            children: [
-                                              Container(
-
-                                                child: ListTile(
-                                                  title: Row(
-                                                    children: [
-                                                      Text("Medicine Name: ", style: TextStyle(
+                                      itemCount:
+                                          document["medicineDetails"].length,
+                                      itemBuilder: (context, index) {
+                                        var data =
+                                            document["medicineDetails"][index];
+                                        return     Column(
+                                          children: [
+                                            Container(
+                                              child: ListTile(
+                                                title: Row(
+                                                  children: [
+                                                    Text("Medicine Name: ",
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                            FontWeight.bold,
+                                                            color: Colors
+                                                                .black54)),
+                                                    Text(
+                                                      data["medicineName"]!,
+                                                      style: TextStyle(
                                                           fontSize: 18,
-                                                          fontWeight:FontWeight.bold,
-                                                          color: Colors.black54)),
-
-                                                      Text(data["medicineName"]!,style: TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:FontWeight.bold,
-                                                          color: Colors.black54),),
-                                                    ],
-                                                  ),),
+                                                          fontWeight:
+                                                          FontWeight.bold,
+                                                          color:
+                                                          Colors.black54),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              SizedBox(height: 15,),
-                                              Container(
-                                                child: ListTile(
-                                                  title: Row(
-                                                    children: [
-                                                      Text("Eating Time: ", style: TextStyle(
+                                            ),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Container(
+                                              child: ListTile(
+                                                title: Row(
+                                                  children: [
+                                                    Text("Eating Time: ",
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                            FontWeight.bold,
+                                                            color: Colors
+                                                                .black54)),
+                                                    Text(
+                                                      data["eating"]!,
+                                                      style: TextStyle(
                                                           fontSize: 18,
-                                                          fontWeight:FontWeight.bold,
-                                                          color: Colors.black54)),
-
-                                                      Text(data["eating"]!,style: TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:FontWeight.bold,
-                                                          color: Colors.black54),),
-                                                    ],
-                                                  ),),
+                                                          fontWeight:
+                                                          FontWeight.bold,
+                                                          color:
+                                                          Colors.black54),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              SizedBox(height: 15,),
-                                              Container(
-
-                                                child: ListTile(
-                                                  title: Row(
-                                                    children: [
-                                                      Text("Quantity: ", style: TextStyle(
+                                            ),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                            Container(
+                                              child: ListTile(
+                                                title: Row(
+                                                  children: [
+                                                    Text("Quantity: ",
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                            FontWeight.bold,
+                                                            color: Colors
+                                                                .black54)),
+                                                    Text(
+                                                      data["qty"]!,
+                                                      style: TextStyle(
                                                           fontSize: 18,
-                                                          fontWeight:FontWeight.bold,
-                                                          color: Colors.black54)),
-
-                                                      Text(data["qty"]!,style: TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:FontWeight.bold,
-                                                          color: Colors.black54),),
-                                                    ],
-                                                  ),),
+                                                          fontWeight:
+                                                          FontWeight.bold,
+                                                          color:
+                                                          Colors.black54),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                              SizedBox(height: 15,),
-                                            ],
-                                          );
-                                        }
+                                            ),
+                                            SizedBox(
+                                              height: 15,
+                                            ),
+                                          ],
+                                        );
+                                        //print("DATE___${DateFormat().add_jm().format(DateTime.now())}");
+                                      //   if(DateFormat().add_jm().format(DateTime.now())== data["time"]){
+                                      //     return Column(
+                                      //       children: [
+                                      //         Container(
+                                      //           child: ListTile(
+                                      //             title: Row(
+                                      //               children: [
+                                      //                 Text("Medicine Name: ",
+                                      //                     style: TextStyle(
+                                      //                         fontSize: 18,
+                                      //                         fontWeight:
+                                      //                         FontWeight.bold,
+                                      //                         color: Colors
+                                      //                             .black54)),
+                                      //                 Text(
+                                      //                   data["medicineName"]!,
+                                      //                   style: TextStyle(
+                                      //                       fontSize: 18,
+                                      //                       fontWeight:
+                                      //                       FontWeight.bold,
+                                      //                       color:
+                                      //                       Colors.black54),
+                                      //                 ),
+                                      //               ],
+                                      //             ),
+                                      //           ),
+                                      //         ),
+                                      //         SizedBox(
+                                      //           height: 15,
+                                      //         ),
+                                      //         Container(
+                                      //           child: ListTile(
+                                      //             title: Row(
+                                      //               children: [
+                                      //                 Text("Eating Time: ",
+                                      //                     style: TextStyle(
+                                      //                         fontSize: 18,
+                                      //                         fontWeight:
+                                      //                         FontWeight.bold,
+                                      //                         color: Colors
+                                      //                             .black54)),
+                                      //                 Text(
+                                      //                   data["eating"]!,
+                                      //                   style: TextStyle(
+                                      //                       fontSize: 18,
+                                      //                       fontWeight:
+                                      //                       FontWeight.bold,
+                                      //                       color:
+                                      //                       Colors.black54),
+                                      //                 ),
+                                      //               ],
+                                      //             ),
+                                      //           ),
+                                      //         ),
+                                      //         SizedBox(
+                                      //           height: 15,
+                                      //         ),
+                                      //         Container(
+                                      //           child: ListTile(
+                                      //             title: Row(
+                                      //               children: [
+                                      //                 Text("Quantity: ",
+                                      //                     style: TextStyle(
+                                      //                         fontSize: 18,
+                                      //                         fontWeight:
+                                      //                         FontWeight.bold,
+                                      //                         color: Colors
+                                      //                             .black54)),
+                                      //                 Text(
+                                      //                   data["qty"]!,
+                                      //                   style: TextStyle(
+                                      //                       fontSize: 18,
+                                      //                       fontWeight:
+                                      //                       FontWeight.bold,
+                                      //                       color:
+                                      //                       Colors.black54),
+                                      //                 ),
+                                      //               ],
+                                      //             ),
+                                      //           ),
+                                      //         ),
+                                      //         SizedBox(
+                                      //           height: 15,
+                                      //         ),
+                                      //       ],
+                                      //     );
+                                      //   }else{
+                                      // return  Container();
+                                      //   }
 
-                                  })
+                                        // if( DateFormat().add_jm().format(DateTime.now()) ==data['time']){
+                                        //  return Text("Abir");
+                                        // }else{
+                                        //
+                                        // }
+                                      }),
                                 ],
                               ),
                             ),
-                          ),
-                        )
-
-                        :Container();
+                          )
+                        : Container();
                   });
-            }
-            else{
+            } else {
               return Center(child: CircularProgressIndicator());
             }
 
@@ -272,16 +531,26 @@ class _HomePageState extends State<HomePage> {
         //   child: Text("No Data!"),
         // ),
         floatingActionButton: FloatingActionButton(
-          onPressed: (){
-            Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const AddMedicine()),);
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddMedicine()),
+            );
           },
           tooltip: 'Add Dose',
           child: const Icon(Icons.add),
         ),
       ),
     );
+  }
 
-
+  Future cancelNotification() async {
+    await FirebaseFirestore.instance.collection("Notification").add({
+      "name": "$name",
+      "EatingTime": "$eating",
+      "quantity": "$qty",
+      "photo": "$image",
+      // "occopation" : workControllar.text
+    });
   }
 }
