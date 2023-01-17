@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_alarm_clock/flutter_alarm_clock.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import 'model/dynamicText.dart';
 
@@ -68,6 +69,7 @@ class _AddMedicineState extends State<AddMedicine> {
             "medicineName" : medicineName[index].text,
             "eating":eatingFood[index].text,
             "qty":qty[index].text,
+            "time" : selectedTimeData,
 
           }),
           "uid":FirebaseAuth.instance.currentUser!.uid,
@@ -81,6 +83,7 @@ class _AddMedicineState extends State<AddMedicine> {
   }
    DateTime selectedDate = DateTime.now();
    TimeOfDay selectedTime = TimeOfDay.now();
+   String selectedTimeData= "";
    DateTime dateTime = DateTime.now();
    bool showDate = false;
    bool showTime = false;
@@ -92,7 +95,11 @@ class _AddMedicineState extends State<AddMedicine> {
      );
      if (selected != null && selected != selectedTime) {
        setState(() {
-         selectedTime = selected;
+        selectedTimeData =  '${selectedTime.hour.toString().padLeft(2, '0')}:${selectedTime.minute.toString().padLeft(2, '0')}';
+       //  selectedTime = selected;
+
+
+         print("SElected Time__$selectedTimeData");
        });
      }
      return selectedTime;
@@ -128,7 +135,7 @@ class _AddMedicineState extends State<AddMedicine> {
          time.minute,
        );
 
-       FlutterAlarmClock.createAlarm(dateTime.hour, dateTime.minute);
+     // FlutterAlarmClock.createAlarm(dateTime.hour, dateTime.minute);
      });
    }
 
@@ -364,9 +371,28 @@ class _AddMedicineState extends State<AddMedicine> {
           width: 10,
         ),
         ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
 
-              _selectDateTime(context);
+              final initialTime =
+              TimeOfDay(hour: 9, minute: 0);
+              final newTime = await showTimePicker(
+                  context: context,
+                  initialTime: initialTime);
+
+              if (newTime == null) return;
+              print(newTime);
+              var df = DateFormat("h:mma");
+              var dt = df.parse(newTime
+                  .format(context)
+                  .replaceAll(" ", ""));
+
+
+              setState(() {
+                selectedTimeData =
+                    DateFormat().add_jm()
+                        .format(dt);
+              });
+
 
 
             }, child: Text("Set Alarm")),

@@ -3,8 +3,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
+import 'package:intl/intl.dart';
 import 'package:medicineremainder/view/addmedicine.dart';
 
 import '../widget/drawer_widget.dart';
@@ -126,109 +126,125 @@ class _HomePageState extends State<HomePage> {
                   primary: false,
                   shrinkWrap: true,
                   itemBuilder: (context,index){
+
                     QueryDocumentSnapshot document= snapshot.data!.docs[index];
+
+
+
+
                     return  auth.currentUser!.uid==document["uid"]?
 
-                        Container(
-                          decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(30)
-                          ),
-                          child: Column(
-                            children: [
-                              SizedBox(height: 20,),
-                              CircleAvatar(
-                                   radius: 70,
-                                   backgroundColor: Colors.blueAccent,
-                                backgroundImage: NetworkImage(document["image"]),
-                                 ),
-                              Container(
-
-                                child:ListTile(
-                                  title: Row(
-                                    children: [
-                                      Text("Patient Name: ", style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight:FontWeight.bold,
-                                          color: Colors.black54)),
-                                      Text(document["patientName"]!,style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight:FontWeight.bold,
-                                          color: Colors.black54),),
-                                    ],
-                                  ),),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Card(
+                            elevation: 4,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  borderRadius: BorderRadius.circular(30)
                               ),
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 20,),
+                                  document["image"]==null  ?  Container():   CircleAvatar(
+                                       radius: 70,
+                                       backgroundColor: Colors.blueAccent,
+                                    backgroundImage: NetworkImage(document["image"]),
+                                     ) ,
+                                  Container(
 
-                              SizedBox(height: 15,),
+                                    child:ListTile(
+                                      title: Row(
+                                        children: [
+                                          Text("Patient Name: ", style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight:FontWeight.bold,
+                                              color: Colors.black54)),
+                                          Text(document["patientName"]!,style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight:FontWeight.bold,
+                                              color: Colors.black54),),
+                                        ],
+                                      ),),
+                                  ),
 
-                              ListView.builder(
+                                  SizedBox(height: 15,),
 
-                                primary: false,
-                                  shrinkWrap: true,
+                                  ListView.builder(
 
-                                  itemCount:document["medicineDetails"].length ,
-                                  itemBuilder: (context, index){
+                                    primary: false,
+                                      shrinkWrap: true,
 
-                                    var data = document["medicineDetails"][index];
-                                return Column(
-                                  children: [
-                                    Container(
+                                      itemCount:document["medicineDetails"].length ,
+                                      itemBuilder: (context, index){
 
-                                      child: ListTile(
-                                        title: Row(
-                                          children: [
-                                            Text("Medicine Name: ", style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight:FontWeight.bold,
-                                                color: Colors.black54)),
+                                        var data = document["medicineDetails"][index];
+                                        if( DateFormat().add_jm().format(DateTime.now()) ==data['time']){
+                                         return Text("Abir Hasan ");
+                                        }else{
+                                          return Column(
+                                            children: [
+                                              Container(
 
-                                            Text(data["medicineName"]!,style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight:FontWeight.bold,
-                                                color: Colors.black54),),
-                                          ],
-                                        ),),
-                                    ),
-                                    SizedBox(height: 15,),
-                                    Container(
-                                      child: ListTile(
-                                        title: Row(
-                                          children: [
-                                            Text("Eating Time: ", style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight:FontWeight.bold,
-                                                color: Colors.black54)),
+                                                child: ListTile(
+                                                  title: Row(
+                                                    children: [
+                                                      Text("Medicine Name: ", style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:FontWeight.bold,
+                                                          color: Colors.black54)),
 
-                                            Text(data["eating"]!,style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight:FontWeight.bold,
-                                                color: Colors.black54),),
-                                          ],
-                                        ),),
-                                    ),
-                                    SizedBox(height: 15,),
-                                    Container(
+                                                      Text(data["medicineName"]!,style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:FontWeight.bold,
+                                                          color: Colors.black54),),
+                                                    ],
+                                                  ),),
+                                              ),
+                                              SizedBox(height: 15,),
+                                              Container(
+                                                child: ListTile(
+                                                  title: Row(
+                                                    children: [
+                                                      Text("Eating Time: ", style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:FontWeight.bold,
+                                                          color: Colors.black54)),
 
-                                      child: ListTile(
-                                        title: Row(
-                                          children: [
-                                            Text("Quantity: ", style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight:FontWeight.bold,
-                                                color: Colors.black54)),
+                                                      Text(data["eating"]!,style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:FontWeight.bold,
+                                                          color: Colors.black54),),
+                                                    ],
+                                                  ),),
+                                              ),
+                                              SizedBox(height: 15,),
+                                              Container(
 
-                                            Text(data["qty"]!,style: TextStyle(
-                                                fontSize: 18,
-                                                fontWeight:FontWeight.bold,
-                                                color: Colors.black54),),
-                                          ],
-                                        ),),
-                                    ),
-                                    SizedBox(height: 15,),
-                                  ],
-                                );
-                              })
-                            ],
+                                                child: ListTile(
+                                                  title: Row(
+                                                    children: [
+                                                      Text("Quantity: ", style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:FontWeight.bold,
+                                                          color: Colors.black54)),
+
+                                                      Text(data["qty"]!,style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:FontWeight.bold,
+                                                          color: Colors.black54),),
+                                                    ],
+                                                  ),),
+                                              ),
+                                              SizedBox(height: 15,),
+                                            ],
+                                          );
+                                        }
+
+                                  })
+                                ],
+                              ),
+                            ),
                           ),
                         )
 
